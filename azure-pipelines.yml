@@ -6,19 +6,31 @@
 trigger:
 - master
 
+resources:
+  containers:
+  - container: postgres
+    image: postgres:11
+  - container: mysql
+    image: mysql:5.7
+
 pool:
   vmImage: 'ubuntu-latest'
+
 strategy:
   matrix:
-    Python35:
-      python.version: '3.5'
     Python36:
       python.version: '3.6'
+      GE_pytest_opts: '--no-sqlalchemy --no-spark'
     Python37:
       python.version: '3.7'
-    Python38:
-      python.version: '3.8'
+      GE_pytest_opts: '--no-sqlalchemy --no-spark'
+    # Python38:
+    #   python.version: '3.8'
 
+
+services:
+  postgres: postgres
+  mysql: mysql
 
 steps:
 - task: UsePythonVersion@0
@@ -33,5 +45,5 @@ steps:
 
 - script: |
     pip install pytest pytest-azurepipelines
-    pytest
+    pytest $(GE_pytest_opts) --napoleon-docstrings
   displayName: 'pytest'
