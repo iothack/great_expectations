@@ -1,26 +1,37 @@
-altair>=3.1.0
+altair>=4.0.0,<5
 black==19.10b0
+black==19.10b0
+# -- Cloud storage
 boto3>=1.9
 Click>=7.1.2
-coveralls>=2.0.0
 freezegun>=0.3.15
 google-cloud-storage>=1.28.0
 ipywidgets>=7.5.1
+
+# Development - Linting
 isort[requirements]==4.3.21
 jinja2>=2.10
 jsonschema>=2.5.1
 marshmallow>3.0
+mistune>=0.8.4
 mock>=3.0.5
 moto>=1.3.7
 numpy>=1.14.1
 pandas>=0.22.0
 pre-commit>=2.3.0
 psycopg2-binary>=2.7.6
+# -- File Format Tests
 pyarrow>=0.12.0
 pybigquery>=0.4.15
-pypandoc>=1.4
+PyMySQL>=0.9.3,<0.10
+# pypandoc>=1.4
+pyparsing>=2.4,<3
+
+# Spark Tests
 pyspark>=2.3.2,<3.0.0
 pytest-cov>=2.8.1
+
+# Required for all tests
 pytest>=5.3.5
 python-dateutil>=2.4.2
 pytz>=2015.6
@@ -29,6 +40,8 @@ ruamel.yaml>=0.15.24
 scipy>=0.19.0
 snowflake-sqlalchemy>=1.2.3
 sqlalchemy-redshift>=0.7.7
+
+# SqlAlchemy Tests
 sqlalchemy>=1.3.16
 termcolor>=1.1.0
 tzlocal>=1.2

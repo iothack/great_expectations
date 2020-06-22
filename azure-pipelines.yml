@@ -16,8 +16,6 @@ resources:
 pool:
   vmImage: 'ubuntu-latest'
 
-
-
 services:
   postgres: postgres
   mysql: mysql
@@ -27,18 +25,21 @@ strategy:
     Python36-Pandas023:
       python.version: '3.6'
       pandas.version: '0.23.4'
+      GE_pytest_pip_opts: '-r requirements-dev-minimal.txt'
       GE_pytest_opts: '--no-sqlalchemy --no-spark'
     Python37-Pandas025:
       python.version: '3.7'
       pandas.version: '0.25.3'
+      GE_pytest_pip_opts: '-r requirements-dev-minimal.txt'
+      GE_pytest_opts: '--no-sqlalchemy --no-spark'
+    Python38:
+      python.version: '3.8'
+      GE_pytest_pip_opts: '-r requirements-dev-minimal.txt'
       GE_pytest_opts: '--no-sqlalchemy --no-spark'
     Python37-PandasLatest:
       python.version: '3.7'
+      GE_pytest_pip_opts: '-r requirements-dev-minimal.txt -r requirements-dev-sqlalchemy.txt -r requirements-dev-spark.txt'
       GE_pytest_opts: ''
-    Python38:
-      python.version: '3.8'
-      GE_pytest_opts: '--no-sqlalchemy --no-spark'
-
 
 steps:
 - task: UsePythonVersion@0
@@ -50,6 +51,7 @@ steps:
     python -m pip install --upgrade pip
     if [ -z "$(pandas.version)" ]; then pip install pandas; else pip install pandas==$(pandas.version); fi
     pip install -r requirements.txt
+    pip install -r $(dev_requirements)
     # Consider fragmenting *all* integration tests into separate folder and run
     pip install .
   displayName: 'Install dependencies'
@@ -58,3 +60,17 @@ steps:
     pip install pytest pytest-azurepipelines
     pytest $(GE_pytest_opts) --napoleon-docstrings
   displayName: 'pytest'
+
+#
+# - task: JavaToolInstaller@0
+#   inputs:
+#     versionSpec: '8'
+#     jdkArchitectureOption: x64# Options: x64, x86
+#     jdkSourceOption: AzureStorage, LocalDirectory
+#     #jdkFile: # Required when jdkSourcmyeOption == LocalDirectory
+#     #azureResourceManagerEndpoint: # Required when jdkSourceOption == AzureStorage
+#     #azureStorageAccountName: # Required when jdkSourceOption == AzureStorage
+#     #azureContainerName: # Required when jdkSourceOption == AzureStorage
+#     #azureCommonVirtualFile: # Required when jdkSourceOption == AzureStorage
+#     jdkDestinationDirectory: /opt/jdk
+#     #cleanDestinationDirectory: true
