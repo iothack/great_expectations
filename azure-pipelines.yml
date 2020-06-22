@@ -52,13 +52,14 @@ steps:
   displayName: 'Update pip'
 - bash: pip install pandas
   condition: eq('$(pandas.version)', 'latest')
-  displayName: 'Install pandas'
+  displayName: 'Install pandas - $(pandas.version)'
 - bash: pip install pandas==$(pandas.version)
   condition: ne('$(pandas.version)', 'latest')
-  displayName: 'Install pandas'
+  displayName: 'Install pandas - $(pandas.version)'
+
 - script: |
     pip install -r requirements.txt
-    pip install $(dev_requirements)
+    pip install $(GE_pytest_pip_opts)
     # Consider fragmenting *all* integration tests into separate folder and run
     pip install .
   displayName: 'Install dependencies'
