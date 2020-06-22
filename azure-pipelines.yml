@@ -50,7 +50,7 @@ steps:
   displayName: 'Use Python $(python.version)'
 - bash: python -m pip install --upgrade pip
   displayName: 'Update pip'
-- bash: pip install pandas
+- bash: pip install pandas==$(pandas.version)
   condition: eq('$(pandas.version)', 'latest')
   displayName: 'Install pandas - $(pandas.version)'
 - bash: pip install pandas==$(pandas.version)
@@ -69,16 +69,11 @@ steps:
     pytest $(GE_pytest_opts) --napoleon-docstrings
   displayName: 'pytest'
 
-#
-# - task: JavaToolInstaller@0
-#   inputs:
-#     versionSpec: '8'
-#     jdkArchitectureOption: x64# Options: x64, x86
-#     jdkSourceOption: AzureStorage, LocalDirectory
-#     #jdkFile: # Required when jdkSourcmyeOption == LocalDirectory
-#     #azureResourceManagerEndpoint: # Required when jdkSourceOption == AzureStorage
-#     #azureStorageAccountName: # Required when jdkSourceOption == AzureStorage
-#     #azureContainerName: # Required when jdkSourceOption == AzureStorage
-#     #azureCommonVirtualFile: # Required when jdkSourceOption == AzureStorage
-#     jdkDestinationDirectory: /opt/jdk
-#     #cleanDestinationDirectory: true
+- task: JavaToolInstaller@0
+inputs:
+  versionSpec: "11"
+  jdkArchitectureOption: x64
+  jdkSourceOption: LocalDirectory
+  jdkFile: "/builds/openjdk-11.0.2_linux-x64_bin.tar.gz"
+  jdkDestinationDirectory: "/builds/binaries/externals"
+  cleanDestinationDirectory: true
