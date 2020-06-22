@@ -32,12 +32,12 @@ strategy:
       pandas.version: '0.25.3'
       GE_pytest_pip_opts: '-r requirements-dev-minimal.txt'
       GE_pytest_opts: '--no-sqlalchemy --no-spark'
-    Python38:
+    Python38-PandasLatest:
       python.version: '3.8'
       pandas.version: 'latest'
       GE_pytest_pip_opts: '-r requirements-dev-minimal.txt'
       GE_pytest_opts: '--no-sqlalchemy --no-spark'
-    Python37-PandasLatest:
+    Python37-FullSuite:
       python.version: '3.7'
       pandas.version: 'latest'
       GE_pytest_pip_opts: '-r requirements-dev-minimal.txt -r requirements-dev-sqlalchemy.txt -r requirements-dev-spark.txt'
@@ -51,10 +51,10 @@ steps:
 - bash: python -m pip install --upgrade pip
   displayName: 'Update pip'
 - bash: pip install pandas
-  condition: eq($(pandas.version), 'latest')
+  condition: eq('$(pandas.version)', 'latest')
   displayName: 'Install pandas'
 - bash: pip install pandas==$(pandas.version)
-  condition: ne($(pandas.version), 'latest')
+  condition: ne('$(pandas.version)', 'latest')
   displayName: 'Install pandas'
 - script: |
     pip install -r requirements.txt
