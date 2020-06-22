@@ -49,9 +49,9 @@ steps:
 
 - script: |
     python -m pip install --upgrade pip
-    if [ -z "$(pandas.version)" ]; then pip install pandas; else pip install pandas==$(pandas.version); fi
+    if [ -z "${pandas.version}" ]; then pip install pandas; else pip install pandas==${pandas.version}; fi
     pip install -r requirements.txt
-    pip install -r $(dev_requirements)
+    pip install ${dev_requirements}
     # Consider fragmenting *all* integration tests into separate folder and run
     pip install .
   displayName: 'Install dependencies'
