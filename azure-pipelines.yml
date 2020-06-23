@@ -46,6 +46,11 @@ strategy:
       pandas.version: 'latest'
       GE_pytest_pip_opts: '-r requirements-dev-minimal.txt'
       GE_pytest_opts: '--no-sqlalchemy --no-spark'
+    Python36-FullSuite:
+      python.version: '3.6'
+      pandas.version: 'latest'
+      GE_pytest_pip_opts: '-r requirements-dev-minimal.txt -r requirements-dev-sqlalchemy.txt -r requirements-dev-spark.txt'
+      GE_pytest_opts: ''
     Python37-FullSuite:
       python.version: '3.7'
       pandas.version: 'latest'
@@ -57,11 +62,14 @@ steps:
   inputs:
     versionSpec: '$(python.version)'
   displayName: 'Use Python $(python.version)'
+
 - bash: python -m pip install --upgrade pip
   displayName: 'Update pip'
+
 - bash: pip install pandas
   condition: eq(variables['pandas.version'], 'latest')
   displayName: 'Install pandas latest'
+
 - bash: pip install pandas==$(pandas.version)
   condition: ne(variables['pandas.version'], 'latest')
   displayName: 'Install pandas - $(pandas.version)'
@@ -74,15 +82,18 @@ steps:
   displayName: 'Install dependencies'
 
 - script: |
-    pip install pytest pytest-azurepipelines
-    pytest $(GE_pytest_opts) --napoleon-docstrings
+    pip install pytest pytest-cov pytest-azurepipelines
+    pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
   displayName: 'pytest'
 
-# - task: JavaToolInstaller@0
-#   inputs:
-#     versionSpec: "11"
-#     jdkArchitectureOption: x64
-#     jdkSourceOption: LocalDirectory
-#     jdkFile: "/builds/openjdk-11.0.2_linux-x64_bin.tar.gz"
-#     jdkDestinationDirectory: "/builds/binaries/externals"
-#     cleanDestinationDirectory: true
+- task: PublishTestResults@2
+  condition: succeededOrFailed()
+  inputs:
+    testResultsFiles: '**/test-*.xml'
+    testRunTitle: 'Publish test results for Python $(python.version)'
+
+- task: PublishCodeCoverageResults@1
+  inputs:
+    codeCoverageTool: Cobertura
+    summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
+    reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
