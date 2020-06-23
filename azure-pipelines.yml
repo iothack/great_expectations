@@ -51,10 +51,10 @@ steps:
 - bash: python -m pip install --upgrade pip
   displayName: 'Update pip'
 - bash: pip install pandas
-  condition: eq('$(pandas.version)', 'latest')
+  condition: eq(variables['pandas.version'], 'latest')
   displayName: 'Install pandas latest'
 - bash: pip install pandas==$(pandas.version)
-  condition: ne('$(pandas.version)', 'latest')
+  condition: ne(variables['pandas.version'], 'latest')
   displayName: 'Install pandas - $(pandas.version)'
 
 - script: |
