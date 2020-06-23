@@ -8,9 +8,9 @@ from functools import wraps
 
 import numpy as np
 import pandas as pd
-import pytest
 from dateutil.parser import parse
 
+import pytest
 from great_expectations.core import (
     ExpectationSuiteValidationResultSchema,
     ExpectationValidationResultSchema,
@@ -203,7 +203,7 @@ def get_dataset(
         from sqlalchemy import create_engine
 
         # Create a new database
-        engine = create_engine("postgresql://postgres@localhost/test_ci")
+        engine = create_engine("postgresql://postgres@postgres/test_ci")
         conn = engine.connect()
 
         sql_dtypes = {}
@@ -238,7 +238,7 @@ def get_dataset(
     elif dataset_type == "mysql":
         from sqlalchemy import create_engine
 
-        engine = create_engine("mysql://root@localhost/test_ci")
+        engine = create_engine("mysql://root@mysql/test_ci")
         conn = engine.connect()
 
         sql_dtypes = {}
