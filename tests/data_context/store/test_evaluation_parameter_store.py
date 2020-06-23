@@ -22,7 +22,7 @@ from great_expectations.data_context.util import instantiate_class_from_config
                     "drivername": "postgresql",
                     "username": "postgres",
                     "password": "",
-                    "host": "postgres",
+                    "host": "localhost",
                     "port": "5432",
                     "database": "test_ci",
                 },

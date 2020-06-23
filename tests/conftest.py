@@ -96,13 +96,13 @@ def build_test_backends_list(metafunc):
             # which can be important for distributional expectations, for example.
             ###
             try:
-                engine = sa.create_engine("postgresql://postgres@postgres/test_ci")
+                engine = sa.create_engine("postgresql://postgres@localhost/test_ci")
                 conn = engine.connect()
                 conn.close()
             except (ImportError, sa.exc.SQLAlchemyError):
                 raise ImportError(
                     "postgresql tests are requested, but unable to connect to the postgresql database at "
-                    "'postgresql://postgres@postgres/test_ci'"
+                    "'postgresql://postgres@localhost/test_ci'"
                 )
             test_backends += ["postgresql"]
             # TODO: enable mysql or other backend tests to be optionally specified
@@ -1902,7 +1902,7 @@ def postgresql_engine(test_backend):
     if test_backend == "postgresql":
         import sqlalchemy as sa
 
-        engine = sa.create_engine("postgresql://postgres@postgres/test_ci").connect()
+        engine = sa.create_engine("postgresql://postgres@localhost/test_ci").connect()
         yield engine
         engine.close()
     else:

@@ -203,7 +203,7 @@ def get_dataset(
         from sqlalchemy import create_engine
 
         # Create a new database
-        engine = create_engine("postgresql://postgres@postgres/test_ci")
+        engine = create_engine("postgresql://postgres@localhost/test_ci")
         conn = engine.connect()
 
         sql_dtypes = {}

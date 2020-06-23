@@ -11,7 +11,7 @@ def test_database_store_backend_duplicate_key_violation(caplog):
             "drivername": "postgresql",
             "username": "postgres",
             "password": "",
-            "host": "postgres",
+            "host": "localhost",
             "port": "5432",
             "database": "test_ci",
         },
