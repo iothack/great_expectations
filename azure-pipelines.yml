@@ -22,78 +22,143 @@ resources:
     env:
      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
 
-pool:
-  vmImage: 'ubuntu-latest'
+stages:
+  - stage: linting
+    pool:
+      vmImage: 'ubuntu-latest'
 
-services:
-  postgres: postgres
-  mysql: mysql
+    jobs:
+      - job: lint
+        steps:
+          - script: |
+              pip install -r requirements-dev.txt
+              isort --check-only --skip docs/
+              black --check --exclude docs/ .
 
-strategy:
-  matrix:
-    Python36-Pandas023:
-      python.version: '3.6'
-      pandas.version: '0.23.4'
-      GE_pytest_pip_opts: '-r requirements-dev-minimal.txt'
-      GE_pytest_opts: '--no-sqlalchemy --no-spark'
-    Python37-Pandas025:
-      python.version: '3.7'
-      pandas.version: '0.25.3'
-      GE_pytest_pip_opts: '-r requirements-dev-minimal.txt'
-      GE_pytest_opts: '--no-sqlalchemy --no-spark'
-    Python38-PandasLatest:
-      python.version: '3.8'
-      pandas.version: 'latest'
-      GE_pytest_pip_opts: '-r requirements-dev-minimal.txt'
-      GE_pytest_opts: '--no-sqlalchemy --no-spark'
-    Python36-FullSuite:
-      python.version: '3.6'
-      pandas.version: 'latest'
-      GE_pytest_pip_opts: '-r requirements-dev-minimal.txt -r requirements-dev-sqlalchemy.txt -r requirements-dev-spark.txt'
-      GE_pytest_opts: ''
-    Python37-FullSuite:
-      python.version: '3.7'
-      pandas.version: 'latest'
-      GE_pytest_pip_opts: '-r requirements-dev-minimal.txt -r requirements-dev-sqlalchemy.txt -r requirements-dev-spark.txt'
-      GE_pytest_opts: ''
+  - stage: required_tests
+    pool:
+      vmImage: 'ubuntu-latest'
 
-steps:
-- task: UsePythonVersion@0
-  inputs:
-    versionSpec: '$(python.version)'
-  displayName: 'Use Python $(python.version)'
+    jobs:
+      - job: pandas_versions
+        strategy:
+          matrix:
+            Python36-Pandas023:
+              python.version: '3.6'
+              pandas.version: '0.23.4'
+              GE_pytest_pip_opts: '-r requirements-dev-minimal.txt'
+              GE_pytest_opts: '--no-sqlalchemy --no-spark'
+            Python37-Pandas025:
+              python.version: '3.7'
+              pandas.version: '0.25.3'
+              GE_pytest_pip_opts: '-r requirements-dev-minimal.txt'
+              GE_pytest_opts: '--no-sqlalchemy --no-spark'
+            Python38-PandasLatest:
+              python.version: '3.8'
+              pandas.version: 'latest'
+              GE_pytest_pip_opts: '-r requirements-dev-minimal.txt'
+              GE_pytest_opts: '--no-sqlalchemy --no-spark'
 
-- bash: python -m pip install --upgrade pip
-  displayName: 'Update pip'
+          # TODO: refactor steps into a task
+          steps:
+            - task: UsePythonVersion@0
+              inputs:
+                versionSpec: '$(python.version)'
+              displayName: 'Use Python $(python.version)'
 
-- bash: pip install pandas
-  condition: eq(variables['pandas.version'], 'latest')
-  displayName: 'Install pandas latest'
+            - bash: python -m pip install --upgrade pip
+              displayName: 'Update pip'
 
-- bash: pip install pandas==$(pandas.version)
-  condition: ne(variables['pandas.version'], 'latest')
-  displayName: 'Install pandas - $(pandas.version)'
+            - bash: pip install pandas
+              condition: eq(variables['pandas.version'], 'latest')
+              displayName: 'Install pandas latest'
 
-- script: |
-    pip install -r requirements.txt
-    pip install $(GE_pytest_pip_opts)
-    # Consider fragmenting *all* integration tests into separate folder and run
-    pip install .
-  displayName: 'Install dependencies'
+            - bash: pip install pandas==$(pandas.version)
+              condition: ne(variables['pandas.version'], 'latest')
+              displayName: 'Install pandas - $(pandas.version)'
 
-- script: |
-    pip install pytest pytest-cov pytest-azurepipelines
-    pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
-  displayName: 'pytest'
+            - displayName: 'Install dependencies'
+              script: |
+                pip install -r requirements.txt
+                pip install $(GE_pytest_pip_opts)
+                # Consider fragmenting *all* integration tests into separate folder and run
+                pip install .
 
-- task: PublishTestResults@2
-  condition: succeededOrFailed()
-  inputs:
-    testResultsFiles: '**/test-*.xml'
-    testRunTitle: 'Publish test results for Python $(python.version)'
+            - displayName: 'pytest'
+              script: |
+                pip install pytest pytest-cov pytest-azurepipelines
+                pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
 
-- task: PublishCodeCoverageResults@1
-  inputs:
-    codeCoverageTool: Cobertura
-    summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
-    reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
+            - task: PublishTestResults@2
+              condition: succeededOrFailed()
+              inputs:
+                testResultsFiles: '**/test-*.xml'
+                testRunTitle: 'Publish test results for Python $(python.version)'
+
+            - task: PublishCodeCoverageResults@1
+              inputs:
+                codeCoverageTool: Cobertura
+                summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
+                reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
+
+      - job: full_suite_test
+        services:
+          postgres: postgres
+          mysql: mysql
+
+        strategy:
+          matrix:
+            Python36:
+              python.version: '3.6'
+              pandas.version: 'latest'
+              GE_pytest_pip_opts: '-r requirements-dev-minimal.txt -r requirements-dev-sqlalchemy.txt -r requirements-dev-spark.txt'
+              GE_pytest_opts: ''
+            Python37:
+              python.version: '3.7'
+              pandas.version: 'latest'
+              GE_pytest_pip_opts: '-r requirements-dev-minimal.txt -r requirements-dev-sqlalchemy.txt -r requirements-dev-spark.txt'
+              GE_pytest_opts: ''
+
+          # TODO: refactor steps into a task
+          steps:
+            - task: UsePythonVersion@0
+              inputs:
+                versionSpec: '$(python.version)'
+              displayName: 'Use Python $(python.version)'
+
+            - bash: python -m pip install --upgrade pip
+              displayName: 'Update pip'
+
+            - bash: pip install pandas
+              condition: eq(variables['pandas.version'], 'latest')
+              displayName: 'Install pandas latest'
+
+            - bash: pip install pandas==$(pandas.version)
+              condition: ne(variables['pandas.version'], 'latest')
+              displayName: 'Install pandas - $(pandas.version)'
+
+            - displayName: 'Install dependencies'
+              script: |
+                pip install -r requirements.txt
+                pip install $(GE_pytest_pip_opts)
+                # Consider fragmenting *all* integration tests into separate folder and run
+                pip install .
+
+            - displayName: 'pytest'
+              script: |
+                pip install pytest pytest-cov pytest-azurepipelines
+                pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+
+            - task: PublishTestResults@2
+              condition: succeededOrFailed()
+              inputs:
+                testResultsFiles: '**/test-*.xml'
+                testRunTitle: 'Publish test results for Python $(python.version)'
+
+            - task: PublishCodeCoverageResults@1
+              inputs:
+                codeCoverageTool: Cobertura
+                summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
+                reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
+
+  - stage: experimental_tests
