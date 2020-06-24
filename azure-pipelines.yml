@@ -59,47 +59,47 @@ stages:
               GE_pytest_pip_opts: '-r requirements-dev-minimal.txt'
               GE_pytest_opts: '--no-sqlalchemy --no-spark'
 
-          # TODO: refactor steps into a task
-          steps:
-            - task: UsePythonVersion@0
-              inputs:
-                versionSpec: '$(python.version)'
-              displayName: 'Use Python $(python.version)'
+        # TODO: refactor steps into a task
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '$(python.version)'
+            displayName: 'Use Python $(python.version)'
 
-            - bash: python -m pip install --upgrade pip
-              displayName: 'Update pip'
+          - bash: python -m pip install --upgrade pip
+            displayName: 'Update pip'
 
-            - bash: pip install pandas
-              condition: eq(variables['pandas.version'], 'latest')
-              displayName: 'Install pandas latest'
+          - bash: pip install pandas
+            condition: eq(variables['pandas.version'], 'latest')
+            displayName: 'Install pandas latest'
 
-            - bash: pip install pandas==$(pandas.version)
-              condition: ne(variables['pandas.version'], 'latest')
-              displayName: 'Install pandas - $(pandas.version)'
+          - bash: pip install pandas==$(pandas.version)
+            condition: ne(variables['pandas.version'], 'latest')
+            displayName: 'Install pandas - $(pandas.version)'
 
-            - displayName: 'Install dependencies'
-              script: |
-                pip install -r requirements.txt
-                pip install $(GE_pytest_pip_opts)
-                # Consider fragmenting *all* integration tests into separate folder and run
-                pip install .
+          - displayName: 'Install dependencies'
+            script: |
+              pip install -r requirements.txt
+              pip install $(GE_pytest_pip_opts)
+              # Consider fragmenting *all* integration tests into separate folder and run
+              pip install .
 
-            - displayName: 'pytest'
-              script: |
-                pip install pytest pytest-cov pytest-azurepipelines
-                pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+          - displayName: 'pytest'
+            script: |
+              pip install pytest pytest-cov pytest-azurepipelines
+              pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
 
-            - task: PublishTestResults@2
-              condition: succeededOrFailed()
-              inputs:
-                testResultsFiles: '**/test-*.xml'
-                testRunTitle: 'Publish test results for Python $(python.version)'
+          - task: PublishTestResults@2
+            condition: succeededOrFailed()
+            inputs:
+              testResultsFiles: '**/test-*.xml'
+              testRunTitle: 'Publish test results for Python $(python.version)'
 
-            - task: PublishCodeCoverageResults@1
-              inputs:
-                codeCoverageTool: Cobertura
-                summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
-                reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
+          - task: PublishCodeCoverageResults@1
+            inputs:
+              codeCoverageTool: Cobertura
+              summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
+              reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
       - job: full_suite_test
         services:
@@ -119,46 +119,46 @@ stages:
               GE_pytest_pip_opts: '-r requirements-dev-minimal.txt -r requirements-dev-sqlalchemy.txt -r requirements-dev-spark.txt'
               GE_pytest_opts: ''
 
-          # TODO: refactor steps into a task
-          steps:
-            - task: UsePythonVersion@0
-              inputs:
-                versionSpec: '$(python.version)'
-              displayName: 'Use Python $(python.version)'
+        # TODO: refactor steps into a task
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '$(python.version)'
+            displayName: 'Use Python $(python.version)'
 
-            - bash: python -m pip install --upgrade pip
-              displayName: 'Update pip'
+          - bash: python -m pip install --upgrade pip
+            displayName: 'Update pip'
 
-            - bash: pip install pandas
-              condition: eq(variables['pandas.version'], 'latest')
-              displayName: 'Install pandas latest'
+          - bash: pip install pandas
+            condition: eq(variables['pandas.version'], 'latest')
+            displayName: 'Install pandas latest'
 
-            - bash: pip install pandas==$(pandas.version)
-              condition: ne(variables['pandas.version'], 'latest')
-              displayName: 'Install pandas - $(pandas.version)'
+          - bash: pip install pandas==$(pandas.version)
+            condition: ne(variables['pandas.version'], 'latest')
+            displayName: 'Install pandas - $(pandas.version)'
 
-            - displayName: 'Install dependencies'
-              script: |
-                pip install -r requirements.txt
-                pip install $(GE_pytest_pip_opts)
-                # Consider fragmenting *all* integration tests into separate folder and run
-                pip install .
+          - displayName: 'Install dependencies'
+            script: |
+              pip install -r requirements.txt
+              pip install $(GE_pytest_pip_opts)
+              # Consider fragmenting *all* integration tests into separate folder and run
+              pip install .
 
-            - displayName: 'pytest'
-              script: |
-                pip install pytest pytest-cov pytest-azurepipelines
-                pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+          - displayName: 'pytest'
+            script: |
+              pip install pytest pytest-cov pytest-azurepipelines
+              pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
 
-            - task: PublishTestResults@2
-              condition: succeededOrFailed()
-              inputs:
-                testResultsFiles: '**/test-*.xml'
-                testRunTitle: 'Publish test results for Python $(python.version)'
+          - task: PublishTestResults@2
+            condition: succeededOrFailed()
+            inputs:
+              testResultsFiles: '**/test-*.xml'
+              testRunTitle: 'Publish test results for Python $(python.version)'
 
-            - task: PublishCodeCoverageResults@1
-              inputs:
-                codeCoverageTool: Cobertura
-                summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
-                reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
+          - task: PublishCodeCoverageResults@1
+            inputs:
+              codeCoverageTool: Cobertura
+              summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
+              reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
-  - stage: experimental_tests
+  # - stage: experimental_tests
