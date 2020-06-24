@@ -77,17 +77,17 @@ stages:
             condition: ne(variables['pandas.version'], 'latest')
             displayName: 'Install pandas - $(pandas.version)'
 
-          - displayName: 'Install dependencies'
-            script: |
+          - script: |
               pip install -r requirements.txt
               pip install $(GE_pytest_pip_opts)
               # Consider fragmenting *all* integration tests into separate folder and run
               pip install .
+            displayName: 'Install dependencies'
 
-          - displayName: 'pytest'
-            script: |
+          - script: |
               pip install pytest pytest-cov pytest-azurepipelines
               pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+            displayName: 'pytest'
 
           - task: PublishTestResults@2
             condition: succeededOrFailed()
@@ -137,17 +137,17 @@ stages:
             condition: ne(variables['pandas.version'], 'latest')
             displayName: 'Install pandas - $(pandas.version)'
 
-          - displayName: 'Install dependencies'
-            script: |
+          - script: |
               pip install -r requirements.txt
               pip install $(GE_pytest_pip_opts)
               # Consider fragmenting *all* integration tests into separate folder and run
               pip install .
+            displayName: 'Install dependencies'
 
-          - displayName: 'pytest'
-            script: |
+          - script: |
               pip install pytest pytest-cov pytest-azurepipelines
               pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+            displayName: 'pytest'
 
           - task: PublishTestResults@2
             condition: succeededOrFailed()
