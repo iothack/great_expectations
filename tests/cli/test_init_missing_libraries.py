@@ -1,8 +1,8 @@
 import os
 
+import pytest
 from click.testing import CliRunner
 
-import pytest
 from great_expectations.cli import cli
 from great_expectations.util import gen_directory_tree_str
 from tests.cli.test_cli import yaml
@@ -114,7 +114,7 @@ def test_cli_init_db_postgres_without_library_installed_instructs_user(
     caplog, tmp_path_factory,
 ):
     _library_not_loaded_test(
-        tmp_path_factory, "\n\n2\n2\nmy_db\nn\n", "psycopg2", "psycopg2", caplog
+        tmp_path_factory, "\n\n2\n2\nmy_db\nn\n", "psycopg2-binary", "psycopg2", caplog
     )
 
 
@@ -125,7 +125,7 @@ def test_cli_init_db_redshift_without_library_installed_instructs_user(
     caplog, tmp_path_factory,
 ):
     _library_not_loaded_test(
-        tmp_path_factory, "\n\n2\n3\nmy_db\nn\n", "psycopg2", "psycopg2", caplog
+        tmp_path_factory, "\n\n2\n3\nmy_db\nn\n", "psycopg2-binary", "psycopg2", caplog
     )
 
 
@@ -138,7 +138,7 @@ def test_cli_init_db_snowflake_without_library_installed_instructs_user(
 ):
     _library_not_loaded_test(
         tmp_path_factory,
-        "\n\n2\n4\nmy_db\nn\n",
+        "\n\n2\n4\nmy_db\n",
         "snowflake-sqlalchemy",
         "snowflake",
         caplog,
@@ -164,8 +164,19 @@ def test_cli_init_spark_without_library_installed_instructs_user(
     assert "Always know what to expect from your data" in stdout
     assert "What data would you like Great Expectations to connect to" in stdout
     assert "What are you processing your files with" in stdout
-    assert "Great Expectations relies on the library `pyspark`" in stdout
-    assert "Please execute `pip install pyspark` before trying again" in stdout
+    assert (
+        f"""Great Expectations relies on the library `pyspark` to connect to your data, \
+but the package `pyspark` containing this library is not installed.
+    Would you like Great Expectations to try to execute `pip install pyspark` for you?"""
+        in stdout
+    )
+    assert (
+        f"""\nOK, exiting now.
+    - Please execute `pip install pyspark` before trying again."""
+        in stdout
+    )
+    # assert "Great Expectations relies on the library `pyspark`" in stdout
+    # assert "Please `pip install pyspark` before trying again" in stdout
 
     assert "Profiling" not in stdout
     assert "Building" not in stdout
