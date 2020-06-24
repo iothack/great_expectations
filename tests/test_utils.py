@@ -8,9 +8,9 @@ from functools import wraps
 
 import numpy as np
 import pandas as pd
+import pytest
 from dateutil.parser import parse
 
-import pytest
 from great_expectations.core import (
     ExpectationSuiteValidationResultSchema,
     ExpectationValidationResultSchema,
